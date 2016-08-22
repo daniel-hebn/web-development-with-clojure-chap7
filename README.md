@@ -1,5 +1,3 @@
-# web-development-with-clojure-chap7
-
 # chapter 7 Database Access
 
 ## 1. 개요
@@ -289,17 +287,18 @@ ex) (find-users db {:ids ["foo" "bar" "baz"]})
 
 ## 3. Generate Reports 
 
-3.1. 개요
+### 3.1. 개요
 clj-pdf library 를 활용하여 database 의 data 기반으로 pdf report 를 생성한다. 
-
 (책에서 제공하는) 예시 프로젝트 구현을 위해 다음의 단계를 거친다.
 
+```
 > lein new luminus reporting-example +postgres
 > lein run migrate
+```
 
---> 2016.08 기준으로 lein new luminus reporting-example +postgres 실행 시 책의 예제와 일부 다른 코드가 생성된다. 
+> **비고**
+> - 2016.08 기준으로 lein new luminus reporting-example +postgres 실행 시 책의 예제와 일부 다른 코드가 생성된다. 
 책에서 제공하는 예시 코드를 다운로드 받아 진행한다. 
-
 
 luminus 기반의 웹 프로젝트를 생성한다. 
 luminus 는 database access 와 관련하여 conman lib 를 사용한다. 
@@ -313,31 +312,29 @@ database access 정보를 담은 map 의 선언과 설정이 끝나면 migration
 (reporting-example/profile.clj 참고 )
 실행 시 프로젝트 루트의 resources/migrations 밑의 sql 이 동작한다. 
 
-3.2. Serializing and Deserializing Data Based on Its Type
+### 3.2. Serializing and Deserializing Data Based on Its Type
 
 사실 문법을 세세하기 이해하진 못했다.
 https://clojure.github.io/java.jdbc/#proto-section 와 책을 기반으로 이해해보면
 
-a. extend-protocol jdbc/IResultSetReadColumn
+### a. extend-protocol jdbc/IResultSetReadColumn
 - database 의 조회 결과를 객체로 변환 (deserialize)
 - clojure.java.jdbc 를 확인해보면... 
---- Protocol for reading objects from the java.sql.ResultSet 
---- result-set-read-column: Function for transforming values after reading them from the database
-- 클로저 내부적으로는 jdbc 를 통해 데이터를 조회한 후 리턴되는 java.sql.ResultSet 을 클로저에 맞게 변환하는 듯 
+> Protocol for reading objects from the java.sql.ResultSet 
+> result-set-read-column: Function for transforming values after reading them from the database
+- 추측하기로는, 클로저 내부적으로는 jdbc 를 통해 데이터를 조회한 후 리턴되는 java.sql.ResultSet 을 클로저에 맞게 변환하는 듯 
 
-b. jdbc/ISQLParameter set-parameter
-c. extend-protocol jdbc/ISQLValue
+### b. jdbc/ISQLParameter set-parameter
+### c. extend-protocol jdbc/ISQLValue
 - database 에서 사용할 파라미터를 변환 (serialize)
 
 
-3.3. 실습 - 준비
-
+### 3.3. 실습 - 준비
 우선 repl 에서 다음의 스크립트 실행
 
+```
 user=> mount.core/start #'reporting-example.db.core/*db*)
-
 user=> (in-ns 'reporting-example.db.core)
-
 user=> (jdbc/insert! *db*
 :employee
 [:name :occupation :place :country]
@@ -348,30 +345,28 @@ user=> (jdbc/insert! *db*
 ["Mahatma Gandhi", "Lawyer", "Gujarat", "India"]
 ["Sachin Tendulkar", "Cricket Player", "Mumbai", "India"] 
 ["Michael Schumacher", "F1 Racer", "Cologne", "Germany"])
+``` 
 
 mount.core 는 잘 모르겠음. 
-- https://github.com/tolitius/mount
-- http://www.luminusweb.net/docs/components.md 
+> https://github.com/tolitius/mount
+> http://www.luminusweb.net/docs/components.md 
 
-
+```
 user=> (conman/bind-connection *db* "sql/queries.sql")
-
 user=> (read-employees)
-
 user=> 결과 조회됨... 
+```
 
-
-3.4. 실습 - reporting generate web 띄우기
+### 3.4. 실습 - reporting generate web 띄우기
 
 지난 발표에서 소개된 구조(luminus)를 따른다. handler, layout, middleware, routes 등
 pdf 구현 중심으로만 간략히 설명한다. 
-
 
 clj-pdf.core 의 pdf function 은 2개의 argument 를 가진다. 
 하나는 document 를 표현하는 vector, 또는 input stream 이고, 다른 하나는 output file name, 또는 output stream 이다. 
 
 다음을 확인해보자. 
-
+```
 (ns reporting-example.reports
   (:require [reporting-example.db.core :as db]
             [clj-pdf.core :refer [pdf template]]))
@@ -386,17 +381,18 @@ clj-pdf.core 의 pdf function 은 2개의 argument 를 가진다.
 	(employee-template (db/read-employees)))]
 "report.pdf")
 
-
 (def employee-template
   (template [$name $occupation $place $country]))
-
+```
 
 employee-template 에 선언된 template 는 input data 를 format 처리하는 macro 이다. 
 (db/read-employees) 는 네임스페이스 reporting-example.db.core 의 read-employees funtion 을 말하고 
 read-employees 는 resources/sql 밑의 select * from employees 쿼리를 나타낸다. 
 
 db/core.clj 의 선언 
+```
 (conman/bind-connection *db* "sql/queries.sql")
+```
 http://www.luminusweb.net/docs/database.md
 
 앞의 HugSQL 과 같은 방식으로 query 의 comment 에 function name 이 선언된다. 
