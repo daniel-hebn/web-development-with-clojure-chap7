@@ -31,7 +31,7 @@ clojure.data.jdbc 를 그대로 사용하여 clojure 에서 db 연동 sql 작성
 1. 로컬에 PostgresSQL 설치 - 생략
 
 2. 다음의 sql 실행
-``` 
+```
 - CREATE USER admin WITH PASSWORD 'admin';
 - CREATE DATABASE REPORTING OWNER admin;
 ```
@@ -39,7 +39,7 @@ clojure.data.jdbc 를 그대로 사용하여 clojure 에서 db 연동 sql 작성
 ### 2.2. Access the Database
 
 (당연하겠지만) database 에 access 하기 위해서는 project.clj 에 org.clojure/java.jdbc library 가 추가되어야 한다.
-```
+```clojure
 (defproject db-examples "0.1.0-SNAPSHOT" 
 	:description "FIXME: write description" 
 	:url "http://example.com/FIXME"
@@ -52,7 +52,7 @@ clojure.data.jdbc 를 그대로 사용하여 clojure 에서 db 연동 sql 작성
 ```
 
 또한 (실습에서 사용할) 네임스페이스 선언과 reference 를 선언한다. 
-```
+```clojure
 (ns db-examples.core
   (:require [clojure.java.jdbc :as sql]))
 ```
@@ -66,7 +66,7 @@ connection 정보를 정의하는 방법은 여러 가지가 있다.
 
 예시에서는 간단한 Parameter Map 방식을 보여준다.
 
-```
+```clojure
 (def db {:subprotocol "postgresql" 
 		 :subname "//localhost/reporting"
 		 :user "admin" 
@@ -98,7 +98,7 @@ user=>  (remove-user! "foo")
 ```
 
 #### Creating Tables
-```
+```clojure
 (defn create-users-table! [] 
 	(sql/db-do-commands db
 		(sql/create-table-ddl
@@ -110,14 +110,14 @@ DDL 문장은 db 접속정보 맵을 가져야 하는 db-do-commands function �
 DB table 생성 시 column 은 dash 를 가질 수 없다. SQL syntax error 
 
 #### Drop Tables 
-```
+```clojure
 (defn drop-table! [name]
   (sql/db-do-commands db
     (sql/drop-table-ddl name)))
 ```
 
 #### Selecting Records
-```
+```clojure
 (defn get-user [id]
 	(first (sql/query db ["select * from users where id = ?" id])))
 	
@@ -126,7 +126,7 @@ ex) (get-user "foo")
 
 #### Inserting Records
 single insert
-```
+```clojure
 (defn add-user! [user] 
 	(sql/insert! db :users user))
 
@@ -144,7 +144,7 @@ ex) (add-users!
 ```
 
 #### Updating Existing Records
-```
+```clojure
 (defn set-pass! [id pass] 
 (sql/update! db :users
   {:pass pass} 
@@ -155,7 +155,7 @@ ex) (set-pass! "foo" "bar")
 vector = where,  map = updated row 를 표현한다.
 
 #### Deleting Records 
-```
+```clojure
 (defn remove-user! [id]
 	(sql/delete! db :users ["id=?" id]))
 
@@ -163,7 +163,7 @@ ex) (remove-user! "foo")
 ```
 #### Transactions
 트랜잭션을 지원한다. sql/with-db-transaction [t-conn db접속정보] 로 선언한 후, Tx 으로 묶을 각각의 쿼리에 t-conn 을 선언한다.
-```
+```clojure
 (defn transaction-example! []
   (sql/with-db-transaction [t-conn db]
     (sql/update!
@@ -186,7 +186,7 @@ HugSQL 의 장점은 SQL query 와 clojure 코드를 분리하여 구현할 수 
 def-db-fns macro 를 활용하여 따로 선언한 sql 파일을 읽어올 수 있다.
 http://www.hugsql.org/#using-def-db-fns
 
-```
+```clojure
 (ns db-examples.hugsql
   (:require [db-examples.core :refer [db]]
             [clojure.java.jdbc :as sql]
@@ -217,7 +217,7 @@ user=>  (add-user-transaction {:id "foobar" :pass "I'm transactional"})
 ```
 
 #### Insert 
-```
+```clojure
 -- :name add-user! :! :n 
 -- :doc adds a new user 
 INSERT INTO users
@@ -232,7 +232,7 @@ ex) (add-user! db {:id "foo" :pass "bar"}))
 126 p 에 각각의 flag 에 대한 설명이 나온다. 
 
 #### Insert And ID Returning
-```
+```clojure
 -- :name add-user-returning! :i :1
 -- :doc adds a new user returning the id INSERT INTO users
 (id, pass)
@@ -244,7 +244,7 @@ ex) (add-user-returning! db {:id "baz" :pass "bar"})
 retuning 은 database driver 에 dependent 하다. 안될 수도 있다는 뜻
 
 #### Multiple Insert
-```
+```clojure
 -- :name add-users! :! :n 
 -- :doc add multiple users 
 INSERT INTO users
@@ -259,7 +259,7 @@ ex) add-users! db
 :t* flag 는 multi insert 할 records vector 의 key 를 가리킨다. 
 
 #### Select 
-```
+```clojure
 -- :name find-user :? :1
 -- find the user with a matching ID SELECT *
 FROM users
@@ -269,7 +269,7 @@ ex) (find-user db {:id "bob"})
 ```
 
 #### Multi Select 
-```
+```clojure
 -- :name find-users :? :*
 -- find users with a matching ID 
 SELECT *
@@ -280,7 +280,7 @@ ex) (find-users db {:ids ["foo" "bar" "baz"]})
 ```
 
 #### mix with clojure.java.jdbc - Transaction
-```
+```clojure
 (defn add-user-transaction [user] (sql/with-db-transaction [t-conn db]
     (if-not (find-user t-conn {:id (:id user)})
             (add-user! t-conn user))))
@@ -354,7 +354,7 @@ mount.core 는 잘 모르겠음.
 > https://github.com/tolitius/mount
 > http://www.luminusweb.net/docs/components.md 
 
-```
+```clojure
 user=> (conman/bind-connection *db* "sql/queries.sql")
 user=> (read-employees)
 user=> 결과 조회됨... 
@@ -369,7 +369,7 @@ clj-pdf.core 의 pdf function 은 2개의 argument 를 가진다.
 하나는 document 를 표현하는 vector, 또는 input stream 이고, 다른 하나는 output file name, 또는 output stream 이다. 
 
 다음을 확인해보자. 
-```
+```clojure
 (ns reporting-example.reports
   (:require [reporting-example.db.core :as db]
             [clj-pdf.core :refer [pdf template]]))
