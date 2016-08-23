@@ -133,7 +133,7 @@ single insert
 ex) (add-user! {:id "foo" :pass "bar"})
 ```
 multiple insert
-```
+```clojure
 (defn add-users! [& users]
 	(apply sql/insert! db :users users))
 
