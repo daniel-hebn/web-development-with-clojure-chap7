@@ -184,6 +184,7 @@ HugSQL 의 장점은 SQL query 와 clojure 코드를 분리하여 구현할 수 
 앞의 2.1. 의 예제에서는 쿼리 문장 전체, 또는 일부가 clojure 코드 안에 존재했다. 
 
 def-db-fns macro 를 활용하여 따로 선언한 sql 파일을 읽어올 수 있다.
+http://www.hugsql.org/#using-def-db-fns
 
 ```
 (ns db-examples.hugsql
