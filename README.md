@@ -319,9 +319,11 @@ https://clojure.github.io/java.jdbc/#proto-section 와 책을 기반으로 이�
 
 ### a. extend-protocol jdbc/IResultSetReadColumn
 - database 의 조회 결과를 객체로 변환 (deserialize)
-- clojure.java.jdbc 를 확인해보면... 
+- clojure.java.jdbc 를 확인해보면...
+```
 > Protocol for reading objects from the java.sql.ResultSet 
 > result-set-read-column: Function for transforming values after reading them from the database
+```
 - 추측하기로는, 클로저 내부적으로는 jdbc 를 통해 데이터를 조회한 후 리턴되는 java.sql.ResultSet 을 클로저에 맞게 변환하는 듯 
 
 ### b. jdbc/ISQLParameter set-parameter
